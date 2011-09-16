@@ -30,18 +30,17 @@ Instructions:
 
 2) Checkout the package:
 
-   scram project -n CMSSW_3_5_7_LQ CMSSW CMSSW_3_5_7
    cvs co -d MyAnalysis/MyAnalyzer/ UserCode/ferencek/MyAnalysis/MyAnalyzer/
 
    The package has the following structure:
 
+   BuildFile.xml
    doc/README.txt
    interface/BaseClass.h
    src/BaseClass.cc
    test/MyAnalyzer.cc
    test/cutFileExample.txt
-   test/myanalyzer_cfg.py
-   BuildFile.xml
+   test/myAnalyzer_cfg.py
 
 3) Copy the example analysis file into the src subdirectory:
 
