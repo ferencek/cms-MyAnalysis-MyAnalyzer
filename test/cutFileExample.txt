@@ -12,7 +12,7 @@
 #
 #VariableName                   value1          value2          value3          value4          level
 #------------                   ------------    -------------   ------------    -------------   -----
-eleFidRegion                    2.4             -               -               -               -1
+muFidRegion                     2.4             -               -               -               -1
 jetFidRegion                    4.5             -               -               -               -1
 #
 #
@@ -33,10 +33,12 @@ jetFidRegion                    4.5             -               -               
 #
 #VariableName         minValue1(<)  maxValue1(>=)        minValue2(<)  maxValue2(>=)   level   histoNbinsMinMax
 #------------         ------------  -------------        ------------  -------------   -----   ----------------
-nEleFinal             2             +inf                 -             -               0       11  -0.5 10.5
+PassPrimaryVertex     0             1                    -             -               0       2 -0.5 1.5
+PassBeamScraping      0             1                    -             -               0       2 -0.5 1.5
+nMuFinal              2             +inf                 -             -               0       11  -0.5 10.5
 nJetFinal             2             +inf                 -             -               0       11  -0.5 10.5
-pTEle1                30            +inf                 -             -               1       100  0   1000
-pTEle2                30            +inf                 -             -               1       100  0   1000
+pTMu1                 30            +inf                 -             -               1       100  0   1000
+pTMu2                 30            +inf                 -             -               1       100  0   1000
 pTJet1                30            +inf                 -             -               2       100  0   1000
 pTJet2                30            +inf                 -             -               2       100  0   1000
 #
@@ -45,5 +47,5 @@ pTJet2                30            +inf                 -             -        
 #---------------------------------------- Cut Optimizer --------------------------------------------------
 #VariableName                   must be OPT   > or <    RangeMin        RangeMax        unused
 #------------                   -----------   ------    ------------    -------------   ------
-#pTEle1                            OPT           >         20              65             1
+#pTMu1                             OPT           >         20              65             1
 #pTJet1                            OPT           >         20              65             1
