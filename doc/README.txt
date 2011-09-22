@@ -21,12 +21,12 @@ Instructions:
 
 1) Set up your CMSSW working area:
 
-   scram project -n CMSSW_4_2_5_MyAnalysis CMSSW CMSSW_4_2_5
-   cd CMSSW_3_5_7_MyAnalysis/src
+   scram project -n CMSSW_4_2_4_MyAnalysis CMSSW CMSSW_4_2_4
+   cd CMSSW_4_2_4_MyAnalysis/src
    cmsenv
 
    NOTE: You can skip this step if you already have your working area set up.
-         CMSSW_4_2_5 is used just as an example.
+         CMSSW_4_2_4 is used just as an example.
 
 2) Checkout the package:
 
@@ -69,7 +69,7 @@ Instructions:
 5) Make appropriate changes to the Python configuration file and run the code:
 
    cd test/
-   cmsRun myanalyzer_cfg.py
+   cmsRun myAnalyzer_cfg.py
 
 
 More details:
