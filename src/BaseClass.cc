@@ -307,7 +307,6 @@ void BaseClass::fillOptimizerWithValue(const string& s, const double& d)
 void
 BaseClass::evaluateCuts()
 {
-  combCutName_passed_.clear();
   for (vector<string>::iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); it++) {
       cut *c = &(cutName_cut_.find(*it)->second);
       if( ! ( c->filled && ( (c->value > c->minValue1 && c->value <= c->maxValue1) || (c->value > c->minValue2 && c->value <= c->maxValue2) ) ) ) {
@@ -543,7 +542,7 @@ BaseClass::writeCutEfficFile()
 
   ofstream os(cutEfficFile_.c_str());
 
-  os << "################################## Preliminary Cut Values ###################################################################\n"
+  os << "################################## Preliminary Cut Values ####################################################################\n"
      << "########################### variableName                 value1          value2          value3          value4          level\n"
      << preCutInfo_.str();
 
@@ -551,7 +550,7 @@ BaseClass::writeCutEfficFile()
   double minForFixed = 0.1;
   int precision = 4;
   os.precision(precision);
-  os << "################################## Cuts #####################################################################################\n"
+  os << "################################## Cuts ######################################################################################\n"
      <<"#id             variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
      << fixed
      << setw(3) << cutIdPed
