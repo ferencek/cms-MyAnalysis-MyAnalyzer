@@ -40,7 +40,7 @@ Instructions:
    src/BaseClass.cc
    test/MyAnalyzer.cc
    test/cutFileExample.txt
-   test/myAnalyzer_cfg.py
+   test/myAnalyzerExample_cfg.py
 
 3) Copy the example analysis file into the src subdirectory:
 
@@ -57,19 +57,38 @@ Instructions:
          ...
 
          In such a case, you might find it more convenient to keep your code in a separate
-         location and create a symbolic link to the version of the analysis code you would
-         like to be used:
+         location and create a link to the version of the analysis code you would like to
+         be used:
 
-         ln -sf /...fullPath.../MyAnalyzer_ver1.cc src/MyAnalyzer.cc
+         ln -f /...fullPath.../MyAnalyzer_ver1.cc  src/MyAnalyzer.cc
          
 4) Compile the code:
 
    scram b -j4
 
-5) Make appropriate changes to the Python configuration file and run the code:
+5) Run the code:
 
    cd test/
-   cmsRun myAnalyzer_cfg.py
+   cmsRun myAnalyzerExample_cfg.py
+
+   NOTE: If you end up having multiple versions of the analysis code, you will presumably also
+         have multiple versions of the cut file and the Python configuration file
+
+         cutFile_ver1.txt
+         myAnalyzer_cfg_ver1.py
+         cutFile_ver2.txt
+         myAnalyzer_cfg_ver2.py
+         cutFile_ver3.txt
+         myAnalyzer_cfg_ver3.py
+         ...
+
+         You can then create symbolic links to the version of the cut file and the Python
+         configuration file
+
+         ln -sf /...fullPath.../cutFile_ver1.txt  cutFile.txt
+         ln -sf /...fullPath.../myAnalyzer_cfg_ver1.txt  myAnalyzer_cfg.py
+
+         and use those to run your analysis code.
 
 
 More details:
