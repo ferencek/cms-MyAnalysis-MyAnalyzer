@@ -13,7 +13,7 @@
 //
 // Original Author:  Dinko Ferencek
 //         Created:  Mon Sep 12 15:06:41 CDT 2011
-// $Id: MyAnalyzer.cc,v 1.2 2011/09/22 22:11:20 ferencek Exp $
+// $Id: MyAnalyzer.cc,v 1.3 2011/10/06 01:03:59 ferencek Exp $
 //
 //
 
@@ -249,7 +249,7 @@ MyAnalyzer::endLuminosityBlock(edm::LuminosityBlock& iLumi, edm::EventSetup cons
       if (iLumi.getByLabel(eventCounterInputTag_, eventCounter) && eventCounter.isValid()) {
           NEvtTotBeforeWeight_ += (double) eventCounter->value;
       } else {
-          edm::LogError("MyAnalyzer::endLuminosityBlock") << "Can't get the product " << eventCounterInputTag_ <<". Please make sure the skimWasMade and eventCounterInputTag parameters were set properly.";
+          edm::LogError("MyAnalyzer::endLuminosityBlock") << "Can't get the product " << eventCounterInputTag_ <<". Please make sure the skimWasMade and eventCounterInputTag parameters were set correctly.";
           exit(1);
       }
   }
