@@ -13,7 +13,7 @@
 //
 // Original Author:  Dinko Ferencek
 //         Created:  Mon Sep 12 15:06:41 CDT 2011
-// $Id: MyAnalyzer.cc,v 1.1 2011/09/16 06:45:01 ferencek Exp $
+// $Id: MyAnalyzer.cc,v 1.2 2011/09/22 22:11:20 ferencek Exp $
 //
 //
 
@@ -216,8 +216,6 @@ MyAnalyzer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
    ret = passedCut("all");
 
    //############################# User's code ends here #################################
-   //#####################################################################################
-   //#################### (DON'T CHANGE ANYTHING BELOW THIS LINE) ########################
    //#####################################################################################
    
    // increment event counters
