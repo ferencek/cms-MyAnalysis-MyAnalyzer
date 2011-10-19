@@ -11,7 +11,7 @@ parameters, execute
 which will produce the following output
 
 Usage: createCrabJobs.py [options]
-Example: ./createCrabJobs.py -w CRAB_Jobs -d datasetListExample.txt -c myAnalyzer_cfg.py -f cutFile.txt -t crab_template.cfg
+Example: ./createCrabJobs.py -w CRAB_Jobs -d datasetList.txt -c myAnalyzer_cfg.py -f cutFile.txt -t crab_template.cfg
 
 Options:
   -h, --help            show this help message and exit
