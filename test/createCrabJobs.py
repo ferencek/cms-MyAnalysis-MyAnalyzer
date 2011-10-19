@@ -6,7 +6,7 @@ from optparse import OptionParser
 
 def main():
   # usage description
-  usage = "Usage: createCrabJobs.py [options] \nExample: ./createCrabJobs.py -w CRAB_Jobs -d datasetListExample.txt -c myAnalyzer_cfg.py -f cutFile.txt -t crab_template.cfg"
+  usage = "Usage: createCrabJobs.py [options] \nExample: ./createCrabJobs.py -w CRAB_Jobs -d datasetListExample.txt -c myAnalyzer_cfg.py -f cutFileExample.txt -t crab_template.cfg"
 
   # input parameters
   parser = OptionParser(usage=usage)
