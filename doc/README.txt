@@ -72,23 +72,17 @@ Instructions:
    cmsRun myAnalyzerExample_cfg.py
 
    NOTE: If you end up having multiple versions of the analysis code, you will presumably also
-         have multiple versions of the cut file and the Python configuration file
+         have multiple versions of the cut file
 
          cutFile_ver1.txt
-         myAnalyzer_cfg_ver1.py
          cutFile_ver2.txt
-         myAnalyzer_cfg_ver2.py
          cutFile_ver3.txt
-         myAnalyzer_cfg_ver3.py
          ...
 
-         You can then create symbolic links to the version of the cut file and the Python
-         configuration file
+         You can then create symbolic links to the version of the cut file you would like
+         to be used:
 
          ln -sf /...fullPath.../cutFile_ver1.txt  cutFile.txt
-         ln -sf /...fullPath.../myAnalyzer_cfg_ver1.txt  myAnalyzer_cfg.py
-
-         and use those to run your analysis code.
 
 
 More details:
