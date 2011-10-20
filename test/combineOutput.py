@@ -4,6 +4,7 @@ import sys, os, subprocess, string, re
 from optparse import OptionParser
 from math import *
 
+
 def UpdateTable(inputTable, outputTable):
     if not outputTable:
         for j,line in enumerate( inputTable ):
@@ -44,7 +45,7 @@ def UpdateTable(inputTable, outputTable):
 
 def CalculateEfficiency(table):
     for j,line in enumerate( table ):
-        if( j == 0):
+        if( j == 0 ):
             table[int(j)] = {'variableName':       table[int(j)]['variableName'],
                              'min1':        table[int(j)]['min1'],
                              'max1':        table[int(j)]['max1'],
@@ -52,13 +53,13 @@ def CalculateEfficiency(table):
                              'max2':        table[int(j)]['max2'],
                              'level':       table[int(j)]['level'],
                              'N':          float(table[j]['N']) ,
-                             'errN':       int(0),
+                             'errN':       float(0),
                              'Npass':      float(table[j]['Npass']) ,
-                             'errNpass':   int(0),
-                             'EffRel':     int(1),
-                             'errEffRel':  int(0),
-                             'EffAbs':     int(1),
-                             'errEffAbs':  int(0),
+                             'errNpass':   float(0),
+                             'EffRel':     float(1),
+                             'errEffRel':  float(0),
+                             'EffAbs':     float(1),
+                             'errEffAbs':  float(0),
                              }
         else:
             N = float(table[j]['N'])
@@ -268,7 +269,7 @@ def main():
       output_dir = os.path.join(os.getcwd(),output_dir)
 
   # open and read the dataset_list file
-  dataset_list_file = open(os.path.join(main_workdir,'datasetList.txt'),"r")
+  dataset_list_file = open(os.path.join(main_workdir,'datasetList.txt'),'r')
   dataset_list_lines = dataset_list_file.readlines()
 
   # loop over datasets
@@ -286,8 +287,8 @@ def main():
 
     crab_output_dir = os.path.join(main_workdir,workdir,'output')
 
-    # merge .root files
-    print 'Merging .root files...'
+    # combine .root files
+    print 'Combining .root files...'
     cmd = 'hadd -f ' + output_root_file + ' ' + os.path.join(crab_output_dir,'*.root')
     proc = subprocess.Popen( cmd, shell=True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
     output = proc.communicate()[0]
@@ -295,10 +296,10 @@ def main():
       print output
       sys.exit(1)
 
-    # merge .txt files
-    print 'Merging .txt files...'
+    # combine .txt files
+    print 'Combining .txt files...'
     
-    dict_final_table = {}
+    final_table = {}
     preCut_list = []
     list_crab_output_dir = os.listdir(crab_output_dir)
     
@@ -315,7 +316,8 @@ def main():
       
       data = {}
       column = []
-      lineCounter = int(0)
+      lineCounter = 0
+      row = int(-1)
 
       for j, line in enumerate( open(txt_file) ):
 
@@ -330,19 +332,16 @@ def main():
               ############################
               continue
 
-          #print "---> lineCounter: " , lineCounter
-          #print line
-
           if lineCounter == 0:
-              for i,piece in enumerate(line.split()):
-                  column.append(piece)
+              for i,element in enumerate(line.split()):
+                  column.append(element)
           else:
-              for i,piece in enumerate(line.split()):
+              for i,element in enumerate(line.split()):
                   if i == 0:
-                      data[int(piece)] = {}
-                      row = int(piece)
+                      row = int(element)
+                      data[row] = {}
                   else:
-                      data[row][ column[i] ] = piece
+                      data[row][ column[i] ] = element
                       #print data[row][ column[i] ]
 
           lineCounter = lineCounter + 1
@@ -360,9 +359,9 @@ def main():
                                 'max2': "-",
                                 'level': "-",
                                 'N': Ntot,
-                                'errN': int(0),
+                                'errN': float(0),
                                 'Npass': Ntot ,
-                                'errNpass': int(0),
+                                'errNpass': float(0),
                                 }
           else:
               N = ( float(data[j]['N'])  )
@@ -401,18 +400,16 @@ def main():
                                 'errNpass': errNpass,
                                 }
 
-      #print newtable
-
       # combine different .txt files from different jobs in one table
-      UpdateTable(newtable, dict_final_table)
+      UpdateTable(newtable, final_table)
 
     # calculate efficiency for each step of the analysis
-    CalculateEfficiency(dict_final_table)
-    #print dict_final_table
+    CalculateEfficiency(final_table)
+    #print final_table
 
     # write table
     output_table_file = open(output_txt_file,'w')
-    WriteTable(dict_final_table, preCut_list, output_table_file)
+    WriteTable(final_table, preCut_list, output_table_file)
     output_table_file.close()
 
     # final output for this dataset
@@ -420,6 +417,7 @@ def main():
     print "Final .root file: " + output_root_file
     print "Final .txt file:  " + output_txt_file
     print ''
+
 
 if __name__ == "__main__":
   main()
