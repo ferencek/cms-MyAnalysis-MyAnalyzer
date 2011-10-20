@@ -142,11 +142,11 @@ Options:
 
 Note that only one optional parameter at a time is allowed. With no optional parameters specified, the CRAB -status command is called.
 
-Once the CRAB jobs have successfully finished and their output has been obtained, you can combine their output using the mergeOutput.py
+Once the CRAB jobs have successfully finished and their output has been obtained, you can combine their output using the combineOutput.py
 script provided in the test/ subdirectory of the MyAnalyzer package. Using this script, you will get one cut efficiency and one
 histograms file per dataset. For a brief description of available input parameters, execute
 
-./mergeOutput.py --help
+./combineOutput.py --help
 
 which will produce the following output
 
