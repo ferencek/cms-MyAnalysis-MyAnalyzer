@@ -139,8 +139,7 @@ BaseClass::readCutFile()
           thisCut.histoNBins = atoi( v[6].c_str() );
           thisCut.histoMin   = atof( v[7].c_str() );
           thisCut.histoMax   = atof( v[8].c_str() );
-          // Not filled from file
-          thisCut.id = ++id;
+          thisCut.id = ++id; // Not filled from file
           string s1;
           if(skimWasMade_) {
               s1 = "cutHisto_skim___________________" + thisCut.variableName;
@@ -151,16 +150,11 @@ BaseClass::readCutFile()
           string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
           string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
           string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
-          if ( fillSkimOrNoCuts_ )                  thisCut.histo1 = fs->make<TH1D>(s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-          if ( fillAllPreviousCuts_ )               thisCut.histo2 = fs->make<TH1D>(s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-          if ( fillAllSameLevelAndLowerLevelCuts_ ) thisCut.histo3 = fs->make<TH1D>(s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-          if ( fillAllOtherCuts_ )                  thisCut.histo4 = fs->make<TH1D>(s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-          if ( fillAllCuts_ )                       thisCut.histo5 = fs->make<TH1D>(s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-          thisCut.histo1->Sumw2();
-          thisCut.histo2->Sumw2();
-          thisCut.histo3->Sumw2();
-          thisCut.histo4->Sumw2();
-          thisCut.histo5->Sumw2();
+          if ( fillSkimOrNoCuts_ )                  { thisCut.histo1 = fs->make<TH1D>(s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo1->Sumw2();}
+          if ( fillAllPreviousCuts_ )               { thisCut.histo2 = fs->make<TH1D>(s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo2->Sumw2();}
+          if ( fillAllSameLevelAndLowerLevelCuts_ ) { thisCut.histo3 = fs->make<TH1D>(s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo3->Sumw2();}
+          if ( fillAllOtherCuts_ )                  { thisCut.histo4 = fs->make<TH1D>(s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo4->Sumw2();}
+          if ( fillAllCuts_ )                       { thisCut.histo5 = fs->make<TH1D>(s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo5->Sumw2();}
           // Filled event by event
           thisCut.filled = false;
           thisCut.value = 0;
