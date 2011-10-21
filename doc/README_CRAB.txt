@@ -161,6 +161,6 @@ Options:
                         Output directory (This parameter is optional)
 
 The -w (--main_workdir) parameter specifies the main working directory containing individual CRAB working directories, and the
--o (--output_dir) parameter specifies the output directory where the merged files will be stored. Note that the -o (--output_dir)
-parameter is optional, and if it is not explicitly defined, the merged files will be stored in the main working directory.
+-o (--output_dir) parameter specifies the output directory where the combined files will be stored. Note that the -o (--output_dir)
+parameter is optional, and if it is not explicitly defined, the combined files will be stored in the main working directory.
 
