@@ -73,11 +73,13 @@ process.source = cms.Source("PoolSource",
 
 ## MyAnalyzer configuration
 process.myAnalyzer = cms.EDFilter('MyAnalyzer',
-    HLTInputTag             = cms.InputTag('TriggerResults','','HLT'),
-    skimWasMade             = cms.bool(True),
-    eventCounterInputTag    = cms.untracked.InputTag('nEventsTotal'),
-    inputCutFile            = cms.string('cutFile.txt'),
-    outputCutEfficiencyFile = cms.string(((options.outputPrefix + '__') if options.outputPrefix != '' else '') + 'cutEfficiency.txt')
+    fillAllSameLevelAndLowerLevelCuts = cms.untracked.bool(False), # to disable automatic creation of less frequently used histograms
+    fillAllCuts                       = cms.untracked.bool(False), # to disable automatic creation of less frequently used histograms
+    HLTInputTag                       = cms.InputTag('TriggerResults','','HLT'),
+    skimWasMade                       = cms.bool(True),
+    eventCounterInputTag              = cms.untracked.InputTag('nEventsTotal'),
+    inputCutFile                      = cms.string('cutFile.txt'),
+    outputCutEfficiencyFile           = cms.string(((options.outputPrefix + '__') if options.outputPrefix != '' else '') + 'cutEfficiency.txt')
 )
 
 ## Paths
