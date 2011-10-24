@@ -13,7 +13,7 @@ Instructions:
    file.
 
 2) Once your analysis code has been tested and works as expected, you are ready to run it over datasets of
-   interest to your analysis. For this, you will have to create a dataset list file. As with the analysis code,
+   interest for your analysis. For this, you will have to create a dataset list file. As with the analysis code,
    a good way to mange your dataset list files is to store them in a separate location and simply create
    a symbolic link to one of them in the test/ subdirectory of the MyAnalyzer package. An example dataset list
    file can be found at the following link:
