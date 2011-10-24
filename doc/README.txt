@@ -40,7 +40,7 @@ Instructions:
    src/BaseClass.cc
    test/MyAnalyzer.cc
    test/cutFileExample.txt
-   test/myAnalyzerExample_cfg.py
+   test/myAnalyzer_cfg.py
 
 3) Copy the example analysis file into the src subdirectory:
 
@@ -69,7 +69,8 @@ Instructions:
 5) Run the code:
 
    cd test/
-   cmsRun myAnalyzerExample_cfg.py
+   cp cutFileExample.txt cutFile.txt
+   cmsRun myAnalyzer_cfg.py
 
    NOTE: If you end up having multiple versions of the analysis code, you will presumably also
          have multiple versions of the cut file
