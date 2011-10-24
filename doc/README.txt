@@ -79,7 +79,7 @@ Instructions:
          cutFile_ver3.txt
          ...
 
-         You can then create symbolic links to the version of the cut file you would like
+         You can then create a symbolic link to the version of the cut file you would like
          to be used:
 
          ln -sf /...fullPath.../cutFile_ver1.txt  cutFile.txt
