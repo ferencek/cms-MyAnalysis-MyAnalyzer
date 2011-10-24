@@ -120,8 +120,8 @@ def WriteTable(table, precutlist, file):
     print >>file, "min2".rjust(14),
     print >>file, "max2".rjust(14),
     print >>file, "level".rjust(14),
-    print >>file, "N".rjust(14),
-    print >>file, "Npass".rjust(14),
+    print >>file, "N".rjust(18),
+    print >>file, "Npass".rjust(18),
     print >>file, "EffRel".rjust(14),
     print >>file, "errEffRel".rjust(14),
     print >>file, "EffAbs".rjust(14),
@@ -137,14 +137,14 @@ def WriteTable(table, precutlist, file):
         print >>file, table[j]['level'].rjust(14),
         ###
         if( table[j]['N'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['N']).rjust(14),
+            print >>file, ("%.04f" % table[j]['N']).rjust(18),
         else:
-            print >>file, ("%.04e" % table[j]['N']).rjust(14),
+            print >>file, ("%.04e" % table[j]['N']).rjust(18),
         ###
         if( table[j]['Npass'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['Npass']).rjust(14),
+            print >>file, ("%.04f" % table[j]['Npass']).rjust(18),
         else:
-            print >>file, ("%.04e" % table[j]['Npass']).rjust(14),
+            print >>file, ("%.04e" % table[j]['Npass']).rjust(18),
         ###
         if( table[j]['EffRel'] >= 0.1 ):
             print >>file, ("%.04f" % table[j]['EffRel']).rjust(14),
@@ -182,8 +182,8 @@ def WriteTable(table, precutlist, file):
     print "min2".rjust(14),
     print "max2".rjust(14),
     print "level".rjust(14),
-    print "N".rjust(14),
-    print "Npass".rjust(14),
+    print "N".rjust(18),
+    print "Npass".rjust(18),
     print "EffRel".rjust(14),
     print "errEffRel".rjust(14),
     print "EffAbs".rjust(14),
@@ -199,14 +199,14 @@ def WriteTable(table, precutlist, file):
         print table[j]['level'].rjust(14),
         ###
         if( table[j]['N'] >= 0.1 ):
-            print ("%.04f" % table[j]['N']).rjust(14),
+            print ("%.04f" % table[j]['N']).rjust(18),
         else:
-            print ("%.04e" % table[j]['N']).rjust(14),
+            print ("%.04e" % table[j]['N']).rjust(18),
         ###
         if( table[j]['Npass'] >= 0.1 ):
-            print ("%.04f" % table[j]['Npass']).rjust(14),
+            print ("%.04f" % table[j]['Npass']).rjust(18),
         else:
-            print ("%.04e" % table[j]['Npass']).rjust(14),
+            print ("%.04e" % table[j]['Npass']).rjust(18),
         ###
         if( table[j]['EffRel'] >= 0.1 ):
             print ("%.04f" % table[j]['EffRel']).rjust(14),

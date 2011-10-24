@@ -121,8 +121,8 @@ def WriteTable(group, table, precutlist, file):
     print >>file, "min2".rjust(14),
     print >>file, "max2".rjust(14),
     print >>file, "level".rjust(14),
-    print >>file, "N".rjust(14),
-    print >>file, "Npass".rjust(14),
+    print >>file, "N".rjust(20),
+    print >>file, "Npass".rjust(20),
     print >>file, "EffRel".rjust(14),
     print >>file, "errEffRel".rjust(14),
     print >>file, "EffAbs".rjust(14),
@@ -138,14 +138,14 @@ def WriteTable(group, table, precutlist, file):
         print >>file, table[j]['level'].rjust(14),
         ###
         if( table[j]['N'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['N']).rjust(14),
+            print >>file, ("%.04f" % table[j]['N']).rjust(20),
         else:
-            print >>file, ("%.04e" % table[j]['N']).rjust(14),
+            print >>file, ("%.04e" % table[j]['N']).rjust(20),
         ###
         if( table[j]['Npass'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['Npass']).rjust(14),
+            print >>file, ("%.04f" % table[j]['Npass']).rjust(20),
         else:
-            print >>file, ("%.04e" % table[j]['Npass']).rjust(14),
+            print >>file, ("%.04e" % table[j]['Npass']).rjust(20),
         ###
         if( table[j]['EffRel'] >= 0.1 ):
             print >>file, ("%.04f" % table[j]['EffRel']).rjust(14),
