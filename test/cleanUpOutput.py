@@ -6,7 +6,7 @@ from optparse import OptionParser
 
 def main():
   # usage description
-  usage = "Usage: combineOutput.py [options] \nExample: ./combineOutput.py -w CRAB_Jobs"
+  usage = "Usage: cleanUpOutput.py [options] \nExample: ./cleanUpOutput.py -w CRAB_Jobs"
 
   # input parameters
   parser = OptionParser(usage=usage)
