@@ -73,11 +73,7 @@ def main():
     elif(options.publish):
       os.system('crab -publish -c ' + workdir)
     elif(options.kill):
-      print 'You are about to kill all jobs for dataset ' + line_elements[0] + '. Are you sure you want to proceed? [Yes/No]'
-      if(raw_input('>') == 'Yes'):
-        os.system('crab -kill all -c ' + workdir)
-      else:
-        print 'No jobs killed'
+      os.system('crab -kill all -c ' + workdir)
     else:
       os.system('crab -status -c ' + workdir)
 
