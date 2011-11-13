@@ -57,10 +57,10 @@ Instructions:
          ...
 
          In such a case, you might find it more convenient to keep your code in a separate
-         location and create a link to the version of the analysis code you would like to
-         be used:
+         location and create a symbolic link to the version of the analysis code you would
+         like to be used:
 
-         ln -f /...fullPath.../MyAnalyzer_ver1.cc  src/MyAnalyzer.cc
+         ln -sf /...fullPath.../MyAnalyzer_ver1.cc  src/MyAnalyzer.cc
          
 4) Compile the code:
 
