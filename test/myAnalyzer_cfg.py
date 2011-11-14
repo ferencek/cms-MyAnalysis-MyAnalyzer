@@ -5,6 +5,13 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 
 options = VarParsing ('python')
 
+options.register('processName',
+    'USER',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "CMSSW process name"
+)
+
 options.register('globalTag',
     'START42_V13::All',
     VarParsing.multiplicity.singleton,
@@ -25,6 +32,20 @@ options.register('reportEvery',
     VarParsing.varType.int,
     "Report every N events (default is N=100)"
 )
+
+options.register('produceSkim',
+    False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Switch to turn ON/OFF skim production"
+)
+
+options.register('skimFilename',
+    'skim.root',
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "Name of the output skim file"
+)
 ## 'maxEvents' is already registered by the Framework, changing default value
 options.setDefault('maxEvents', 1000)
 
@@ -35,7 +56,7 @@ options.parseArguments()
 
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("USER")
+process = cms.Process(options.processName)
 
 ############## IMPORTANT ########################################
 # If you run over many samples and you save the log, remember to reduce
@@ -59,10 +80,11 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
 )
 
-## Output ROOT file
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string(((options.outputPrefix + '__') if options.outputPrefix != '' else '') + 'histograms.root')
-)
+if not options.produceSkim:
+    ## Output ROOT file
+    process.TFileService = cms.Service("TFileService",
+        fileName = cms.string(((options.outputPrefix + '__') if options.outputPrefix != '' else '') + 'histograms.root')
+    )
 
 ## Input files
 process.source = cms.Source("PoolSource",
@@ -75,6 +97,7 @@ process.source = cms.Source("PoolSource",
 process.myAnalyzer = cms.EDFilter('MyAnalyzer',
     fillAllSameLevelAndLowerLevelCuts = cms.untracked.bool(False), # to disable automatic creation of less frequently used histograms
     fillAllCuts                       = cms.untracked.bool(False), # to disable automatic creation of less frequently used histograms
+    skimMode                          = cms.untracked.bool(options.produceSkim), # when enabled, the cutEfficiency file and output histograms are not produced
     HLTInputTag                       = cms.InputTag('TriggerResults','','HLT'),
     skimWasMade                       = cms.bool(True),
     eventCounterInputTag              = cms.untracked.InputTag('nEventsTotal'),
@@ -87,3 +110,41 @@ process.p = cms.Path(process.myAnalyzer)
 
 ## Schedule definition
 process.schedule = cms.Schedule(process.p)
+
+if options.produceSkim:
+    ## Output file
+    process.out = cms.OutputModule("PoolOutputModule",
+        fileName = cms.untracked.string(options.skimFilename),
+        # save only events passing the full path
+        SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+        dropMetaData = cms.untracked.string("ALL"),
+        outputCommands = cms.untracked.vstring(
+            'drop *',
+            'keep *_gtDigis_*_*',
+            'keep *_TriggerResults_*_*',
+            'drop *_TriggerResults_*_' + options.processName,
+            'keep *_hltTriggerSummaryAOD_*_*',
+            'keep *_nEventsTotal_*_*',
+            'keep *_kt6PFJets_rho_*',
+            'keep *_kt6PFJetsForIsolation_rho_*',
+            'keep *_AK5CaloJets_*_*',
+            'keep *_AK7CaloJets_*_*',
+            'keep *_AK5GenJets_*_*',
+            'keep *_AK7GenJets_*_*',
+            'keep *_AK5PFJets_*_*',
+            'keep *_AK7PFJets_*_*',
+            'keep *_CaloMET_*_*',
+            'keep *_EventSelection_*_*',
+            'keep *_GenEventInfo_*_*',
+            'keep *_GenParticles_*_*',
+            'keep *_Muons_*_*',
+            'keep *_PFMET_*_*',
+            'keep *_Vertices_*_*'
+        )
+    )
+
+    ## EndPath definition
+    process.outpath = cms.EndPath(process.out)
+
+    ## Updated schedule definition
+    process.schedule.append(process.outpath)

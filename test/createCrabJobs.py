@@ -106,8 +106,10 @@ def main():
       crab_cfg_content = re.sub('lumi_mask','#lumi_mask',crab_cfg_content)
     crab_cfg_content = re.sub('TOTAL_LUMIS',line_elements[1],crab_cfg_content)
     crab_cfg_content = re.sub('N_JOBS',line_elements[2],crab_cfg_content)
-
-    crab_cfg_content = re.sub('OUTPUT_FILES','%s__histograms.root, %s__cutEfficiency.txt'%(prefix,prefix),crab_cfg_content)
+    if(line_elements[8] != '1'):
+      crab_cfg_content = re.sub('OUTPUT_FILES','%s__histograms.root, %s__cutEfficiency.txt'%(prefix,prefix),crab_cfg_content)
+    else:
+      crab_cfg_content = re.sub('output_file','#output_file',crab_cfg_content)
     cfg_parameters = 'outputPrefix=%s'%prefix
     if( len(line_elements)>10 ):
       for param in range(10,len(line_elements)):
@@ -115,7 +117,14 @@ def main():
     crab_cfg_content = re.sub('CFG_PARAMETERS',cfg_parameters,crab_cfg_content)
     crab_cfg_content = re.sub('INPUT_FILES',os.path.join(cfg_files_dir,'cutFile.txt'),crab_cfg_content)
     crab_cfg_content = re.sub('WORKING_DIR',os.path.join(main_workdir,prefix),crab_cfg_content)
-    crab_cfg_content = re.sub('OUTPUT_DIR',os.path.join(main_workdir,prefix,'output'),crab_cfg_content)
+    if(line_elements[8] != '1'):
+      crab_cfg_content = re.sub('OUTPUT_DIR',os.path.join(main_workdir,prefix,'output'),crab_cfg_content)
+    else:
+      crab_cfg_content = re.sub('outputdir','#outputdir',crab_cfg_content)
+    if(line_elements[8] == '1'):
+      crab_cfg_content = re.sub('return_data = 1','return_data = 0',crab_cfg_content)
+      crab_cfg_content = re.sub('copy_data = 0','copy_data = 1',crab_cfg_content)
+      crab_cfg_content = re.sub('publish_data = 0','publish_data = 1',crab_cfg_content)
     crab_cfg_content = re.sub('PUBLICATION_NAME',line_elements[9] + (('_' + line_elements[3]) if line_elements[3] != '-' else ''),crab_cfg_content)
 
     # create a CRAB cfg file
