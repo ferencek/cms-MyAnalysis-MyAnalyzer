@@ -16,7 +16,7 @@
 //
 // Original Author:  Dinko Ferencek
 //         Created:  Mon Sep 12 15:06:41 CDT 2011
-// $Id$
+// $Id: BaseClass.h,v 1.1 2011/09/16 06:45:00 ferencek Exp $
 //
 //
 
@@ -219,6 +219,9 @@ class BaseClass {
       bool fillAllOtherCuts_;
       bool fillAllSameLevelAndLowerLevelCuts_;
       bool fillAllCuts_;
+
+      // Skim mode (in this mode, the BaseClass does not produce any output which is useful when producing a skim)
+      bool skimMode_;
 
       TH1D *EventCuts_; // number of events passing each cut
       

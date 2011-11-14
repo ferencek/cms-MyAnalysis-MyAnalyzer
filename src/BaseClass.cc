@@ -15,6 +15,7 @@ BaseClass::BaseClass(const edm::ParameterSet& iConfig)
    fillAllOtherCuts_                  = iConfig.getUntrackedParameter<bool>("fillAllOtherCuts",true);
    fillAllSameLevelAndLowerLevelCuts_ = iConfig.getUntrackedParameter<bool>("fillAllSameLevelAndLowerLevelCuts",true);
    fillAllCuts_                       = iConfig.getUntrackedParameter<bool>("fillAllCuts",true);
+   skimMode_                          = iConfig.getUntrackedParameter<bool>("skimMode",false);
    writeOptCutFile_                   = iConfig.getUntrackedParameter<bool>("writeOptimizationCutFile",false);
    optCutFileName_                    = iConfig.getUntrackedParameter<string>("optimizationCutFileName","OptimizationCuts.txt");
    skimWasMade_                       = iConfig.getParameter<bool>("skimWasMade");
@@ -150,11 +151,11 @@ BaseClass::readCutFile()
           string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
           string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
           string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
-          if ( fillSkimOrNoCuts_ )                  { thisCut.histo1 = fs->make<TH1D>(s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo1->Sumw2();}
-          if ( fillAllPreviousCuts_ )               { thisCut.histo2 = fs->make<TH1D>(s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo2->Sumw2();}
-          if ( fillAllSameLevelAndLowerLevelCuts_ ) { thisCut.histo3 = fs->make<TH1D>(s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo3->Sumw2();}
-          if ( fillAllOtherCuts_ )                  { thisCut.histo4 = fs->make<TH1D>(s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo4->Sumw2();}
-          if ( fillAllCuts_ )                       { thisCut.histo5 = fs->make<TH1D>(s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo5->Sumw2();}
+          if ( !skimMode_ && fillSkimOrNoCuts_ )                  { thisCut.histo1 = fs->make<TH1D>(s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo1->Sumw2();}
+          if ( !skimMode_ && fillAllPreviousCuts_ )               { thisCut.histo2 = fs->make<TH1D>(s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo2->Sumw2();}
+          if ( !skimMode_ && fillAllSameLevelAndLowerLevelCuts_ ) { thisCut.histo3 = fs->make<TH1D>(s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo3->Sumw2();}
+          if ( !skimMode_ && fillAllOtherCuts_ )                  { thisCut.histo4 = fs->make<TH1D>(s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo4->Sumw2();}
+          if ( !skimMode_ && fillAllCuts_ )                       { thisCut.histo5 = fs->make<TH1D>(s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax); thisCut.histo5->Sumw2();}
           // Filled event by event
           thisCut.filled = false;
           thisCut.value = 0;
@@ -175,7 +176,7 @@ BaseClass::readCutFile()
       exit (1);
   }
   // make optimizer histogram
-  if ( optimizeName_cut_.size() > 0 ) {
+  if ( !skimMode_ && optimizeName_cut_.size() > 0 ) {
       h_Optimizer_ = fs->make<TH1D>("Optimizer","Optimization of cut variables",(int)pow(10,optimizeName_cut_.size()),0,
                                pow(10,optimizeName_cut_.size()));
   }
@@ -183,7 +184,7 @@ BaseClass::readCutFile()
   // Create a histogram that will show events passing cuts
   int cutsize = orderedCutNames_.size() + 1;
   if ( skimWasMade_ ) ++cutsize;
-  EventCuts_ = fs->make<TH1D>("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
+  if ( !skimMode_ ) EventCuts_ = fs->make<TH1D>("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
 
   is.close();
 }
@@ -335,8 +336,8 @@ BaseClass::evaluateCuts()
 void
 BaseClass::runOptimizer()
 {
-  // don't run optimizer if no optimized cuts specified
-  if (optimizeName_cut_.size()==0)
+  // don't run optimizer if the skim mode is enabled or no optimized cuts specified
+  if ( skimMode_ || optimizeName_cut_.size()==0)
     return;
 
   // first, check that all cuts (except those to be optimized) have been passed
@@ -390,6 +391,9 @@ bool
 BaseClass::fillCutHistos()
 {
   bool ret = true;
+
+  if( skimMode_ ) return ret;
+  
   for (map<string, cut>::iterator it = cutName_cut_.begin(); it != cutName_cut_.end(); it++) {
       cut *c = &(it->second);
       if( c->filled ) {
@@ -400,6 +404,7 @@ BaseClass::fillCutHistos()
           if ( fillAllCuts_ && passedCut("all") )                                                           c->histo5->Fill( c->value, c->weight );
       }
   }
+  
   return ret;
 }
 
@@ -407,6 +412,7 @@ bool
 BaseClass::updateCutEffic()
 {
   bool ret = true;
+  
   for (map<string, cut>::iterator it = cutName_cut_.begin(); it != cutName_cut_.end(); it++) {
       cut *c = &(it->second);
       if( passedAllPreviousCuts(c->variableName) ) {
@@ -420,6 +426,7 @@ BaseClass::updateCutEffic()
           }
       }
   }
+  
   return ret;
 }
 
@@ -516,6 +523,8 @@ BaseClass::writeCutEfficFile()
 {
   bool ret = true;
 
+  if( skimMode_ ) return ret;
+    
   // set bin labels for event counter histogram
   int bincounter = 1;
   EventCuts_->GetXaxis()->SetBinLabel(bincounter,"NoCuts");
@@ -899,6 +908,8 @@ BaseClass::getHistoMax(const string& s)
 void
 BaseClass::CreateAndFillUserTH1D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
 {
+  if( skimMode_ ) return;
+  
   map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
   if( nh_h == userTH1Ds_.end() ) {
       TH1D *h = fs->make<TH1D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
@@ -913,6 +924,8 @@ BaseClass::CreateAndFillUserTH1D(const string& nameAndTitle, Int_t nbinsx, Doubl
 void
 BaseClass::CreateUserTH1D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
 {
+  if( skimMode_ ) return;
+ 
   map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
   if( nh_h == userTH1Ds_.end() ) {
       TH1D *h = fs->make<TH1D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
@@ -939,6 +952,8 @@ BaseClass::FillUserTH1D(const string& nameAndTitle, Double_t value, Double_t wei
 void
 BaseClass::CreateAndFillUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
 {
+  if( skimMode_ ) return;
+ 
   map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
   if( nh_h == userTH2Ds_.end() ) {
       TH2D *h = fs->make<TH2D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
@@ -953,6 +968,8 @@ BaseClass::CreateAndFillUserTH2D(const string& nameAndTitle, Int_t nbinsx, Doubl
 void
 BaseClass::CreateUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
 {
+  if( skimMode_ ) return;
+ 
   map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
   if( nh_h == userTH2Ds_.end() ) {
       TH2D *h = fs->make<TH2D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
@@ -967,6 +984,8 @@ BaseClass::CreateUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlo
 void
 BaseClass::FillUserTH2D(const string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
+  if( skimMode_ ) return;
+ 
   map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
   if( nh_h == userTH2Ds_.end() ) {
       edm::LogError("BaseClass::FillUserTH2D") << "Trying to fill histogram "<<nameAndTitle<<" that was not defined.";
