@@ -67,12 +67,13 @@ struct cut {
   double value;
   double weight;
   bool passed;
-  double nEvtInput;
+  //double nEvtInput;
   double nEvtPassedBeforeWeight;
   double nEvtPassed;
   double nEvtPassedErr2;
   bool nEvtPassedBeforeWeight_alreadyFilled;
-  bool saveVariableInReducedSkim;
+  bool blockFurtherUpdates;
+  //bool saveVariableInReducedSkim;
 };
 
 struct preCut {
@@ -141,6 +142,7 @@ class BaseClass {
       ~BaseClass();
 
       void resetCuts(const string& s = "newEvent");
+      void resetCuts(const vector<string>& cutNames);
       void fillVariableWithValue(const string&, const double&, const double& weight = 1.);
       void evaluateCuts();
 
@@ -187,8 +189,6 @@ class BaseClass {
 
       void readCutFile();
       bool fillCutHistos();
-      bool writeCutHistos();
-      bool writeUserHistos();
       bool updateCutEffic();
       bool writeCutEfficFile();
       bool sortCuts(const cut&, const cut&);
@@ -222,6 +222,9 @@ class BaseClass {
 
       // Skim mode (in this mode, the BaseClass does not produce any output which is useful when producing a skim)
       bool skimMode_;
+
+      // Check that the cuts in the cutNames vector are defined in the input cutFile (this check is done only once per job)
+      bool doResetCutCheck_;
 
       TH1D *EventCuts_; // number of events passing each cut
       

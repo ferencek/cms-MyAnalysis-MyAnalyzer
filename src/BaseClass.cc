@@ -23,6 +23,8 @@ BaseClass::BaseClass(const edm::ParameterSet& iConfig)
    cutFile_                           = iConfig.getParameter<string>("inputCutFile");
    cutEfficFile_                      = iConfig.getParameter<string>("outputCutEfficiencyFile");
 
+   doResetCutCheck_ = true;
+   
    // read the input cut file
    readCutFile();
 
@@ -92,7 +94,7 @@ BaseClass::readCutFile()
               continue;
           }
 
-          map<string, cut>::iterator cc = cutName_cut_.find(v[0]);
+          map<string, cut>::const_iterator cc = cutName_cut_.find(v[0]);
           if ( cc != cutName_cut_.end() ) {
               edm::LogError("BaseClass::readCutFile") << "variableName = "<< v[0] << " exists already in cutName_cut_. Returning.";
               exit(1);
@@ -100,7 +102,7 @@ BaseClass::readCutFile()
 
           int level_int = atoi(v[5].c_str());
           if ( level_int == -1 ) {
-              map<string, preCut>::iterator cc = preCutName_cut_.find(v[0]);
+              map<string, preCut>::const_iterator cc = preCutName_cut_.find(v[0]);
               if( cc != preCutName_cut_.end() ) {
                   edm::LogError("BaseClass::readCutFile") << "variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.";
                   exit(1);
@@ -165,6 +167,7 @@ BaseClass::readCutFile()
           thisCut.nEvtPassed = 0;
           thisCut.nEvtPassedErr2 = 0;
           thisCut.nEvtPassedBeforeWeight_alreadyFilled = false;
+          thisCut.blockFurtherUpdates = false;
 
           orderedCutNames_.push_back(thisCut.variableName);
           cutName_cut_[thisCut.variableName] = thisCut;
@@ -226,18 +229,63 @@ BaseClass::decodeCutValue(const string& s)
 void
 BaseClass::resetCuts(const string& s)
 {
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) {
+  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); ++cc)
+  {
       cut *c = &(cc->second);
       c->filled = false;
       c->value = 0;
       c->weight = 1;
       c->passed = false;
-      if( s == "newEvent" ) {
+      c->blockFurtherUpdates = false;
+      if( s == "newEvent" )
+      {
           c->nEvtPassedBeforeWeight_alreadyFilled = false;
-      } else if( s != "sameEvent" ) {
+      }
+      else if( s != "sameEvent" )
+      {
           edm::LogError("BaseClass::resetCuts") << "Unrecognized option. Only allowed options are 'sameEvent' and 'newEvent'; no option = 'newEvent'.";
           exit(1);
       }
+  }
+  combCutName_passed_.clear();
+  return;
+}
+
+void
+BaseClass::resetCuts(const vector<string>& cutNames)
+{
+  if(doResetCutCheck_)
+  {
+    for(vector<string>::const_iterator it = cutNames.begin(); it != cutNames.end(); ++it)
+    {
+      map<string, cut>::iterator cc = cutName_cut_.find(*it);
+      if( cc == cutName_cut_.end() )
+      {
+        edm::LogError("BaseClass::resetCuts") << "Did not find variableName = "<<(*it)<<" in cutName_cut_. Returning.";
+        exit(1);
+      }
+    }
+    doResetCutCheck_ = false;
+  }
+ 
+  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); ++cc)
+  {
+    cut *c = &(cc->second);
+    
+    vector<string>::const_iterator it = find(cutNames.begin(),cutNames.end(),cc->first);
+    if( it == cutNames.end() )
+    {
+      c->passed = false;
+      c->blockFurtherUpdates = true;
+    }
+    else
+    {
+      c->filled = false;
+      c->value = 0;
+      c->weight = 1;
+      c->passed = false;
+      c->blockFurtherUpdates = false;
+    }
   }
   combCutName_passed_.clear();
   return;
@@ -263,24 +311,24 @@ BaseClass::fillVariableWithValue(const string& s, const double& d, const double&
 bool
 BaseClass::variableIsFilled(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if ( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::variableIsFilled") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
   }
-  cut *c = &(cc->second);
+  const cut *c = &(cc->second);
   return (c->filled);
 }
 
 double
 BaseClass::getVariableValue(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if ( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getVariableValue") << "Did not find variableName = "<<s<<" in cutName_cut_.";
       exit(1);
   }
-  cut *c = &(cc->second);
+  const cut *c = &(cc->second);
   if ( !variableIsFilled(s) ) {
       edm::LogError("BaseClass::getVariableValue") <<  "Requesting value of a variable that has not yet been filled"<<s;
       exit(1);
@@ -302,7 +350,7 @@ void BaseClass::fillOptimizerWithValue(const string& s, const double& d)
 void
 BaseClass::evaluateCuts()
 {
-  for (vector<string>::iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); it++) {
+  for (vector<string>::const_iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); ++it) {
       cut *c = &(cutName_cut_.find(*it)->second);
       if( ! ( c->filled && ( (c->value > c->minValue1 && c->value <= c->maxValue1) || (c->value > c->minValue2 && c->value <= c->maxValue2) ) ) ) {
           c->passed = false;
@@ -310,9 +358,9 @@ BaseClass::evaluateCuts()
           combCutName_passed_["all"] = false;
       } else {
           c->passed = true;
-          map<string,bool>::iterator cp = combCutName_passed_.find( c->level_str.c_str() );
+          map<string,bool>::const_iterator cp = combCutName_passed_.find( c->level_str.c_str() );
           if ( cp == combCutName_passed_.end() ) combCutName_passed_[c->level_str.c_str()] = true;
-          map<string,bool>::iterator ap = combCutName_passed_.find("all");
+          map<string,bool>::const_iterator ap = combCutName_passed_.find("all");
           if ( ap == combCutName_passed_.end() ) combCutName_passed_["all"] = true;
       }
   }
@@ -341,7 +389,7 @@ BaseClass::runOptimizer()
     return;
 
   // first, check that all cuts (except those to be optimized) have been passed
-  for (vector<string>::iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); it++) {
+  for (vector<string>::const_iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); ++it) {
       bool ignorecut=false;
       for (unsigned int i=0; i < optimizeName_cut_.size(); ++i) {
           if (optimizeName_cut_[i].variableName == *it) {
@@ -393,10 +441,10 @@ BaseClass::fillCutHistos()
   bool ret = true;
 
   if( skimMode_ ) return ret;
-  
-  for (map<string, cut>::iterator it = cutName_cut_.begin(); it != cutName_cut_.end(); it++) {
+
+  for (map<string, cut>::iterator it = cutName_cut_.begin(); it != cutName_cut_.end(); ++it) {
       cut *c = &(it->second);
-      if( c->filled ) {
+      if( c->filled && !c->blockFurtherUpdates ) {
           if ( fillSkimOrNoCuts_ )                                                                          c->histo1->Fill( c->value, c->weight );
           if ( fillAllPreviousCuts_ && passedAllPreviousCuts(c->variableName) )                             c->histo2->Fill( c->value, c->weight );
           if ( fillAllSameLevelAndLowerLevelCuts_ && passedAllOtherSameAndLowerLevelCuts(c->variableName) ) c->histo3->Fill( c->value, c->weight );
@@ -413,17 +461,17 @@ BaseClass::updateCutEffic()
 {
   bool ret = true;
   
-  for (map<string, cut>::iterator it = cutName_cut_.begin(); it != cutName_cut_.end(); it++) {
+  for (map<string, cut>::iterator it = cutName_cut_.begin(); it != cutName_cut_.end(); ++it) {
       cut *c = &(it->second);
-      if( passedAllPreviousCuts(c->variableName) ) {
-          if( passedCut(c->variableName) ) {
-              if ( c->nEvtPassedBeforeWeight_alreadyFilled == false) {
-                  c->nEvtPassedBeforeWeight += 1;
-                  c->nEvtPassedBeforeWeight_alreadyFilled = true;
-              }
-              c->nEvtPassed += c->weight;
-              c->nEvtPassedErr2 += (c->weight)*(c->weight);
+      if( passedAllPreviousCuts(c->variableName) && passedCut(c->variableName) && !c->blockFurtherUpdates )
+      {
+          if ( c->nEvtPassedBeforeWeight_alreadyFilled == false)
+          {
+              c->nEvtPassedBeforeWeight += 1;
+              c->nEvtPassedBeforeWeight_alreadyFilled = true;
           }
+          c->nEvtPassed += c->weight;
+          c->nEvtPassedErr2 += (c->weight)*(c->weight);
       }
   }
   
@@ -433,12 +481,12 @@ BaseClass::updateCutEffic()
 bool
 BaseClass::passedCut(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc != cutName_cut_.end() ) {
       cut *c = &(cutName_cut_.find(s)->second);
       return (c->filled && c->passed);
   }
-  map<string, bool>::iterator cp = combCutName_passed_.find(s);
+  map<string, bool>::const_iterator cp = combCutName_passed_.find(s);
   if( cp != combCutName_passed_.end() ) {
       return (cp->second);
   }
@@ -451,13 +499,13 @@ BaseClass::passedAllPreviousCuts(const string& s)
 {
   bool ret = true;
   
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogWarning("BaseClass::passedAllPreviousCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning false.";
       return false;
   }
 
-  for (vector<string>::iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); it++) {
+  for (vector<string>::const_iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); ++it) {
       cut *c = &(cutName_cut_.find(*it)->second);
       if( c->variableName == s ) {
           return true;
@@ -474,14 +522,14 @@ BaseClass::passedAllOtherCuts(const string& s)
 {
   bool ret = true;
   
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogWarning("BaseClass::passedAllOtherCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning false.";
       return false;
   }
 
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) {
-      cut *c = &(cc->second);
+  for (map<string, cut>::const_iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); ++cc) {
+      const cut *c = &(cc->second);
       if( c->variableName == s ) {
           continue;
       } else {
@@ -498,7 +546,7 @@ BaseClass::passedAllOtherSameAndLowerLevelCuts(const string& s)
   bool ret = true;
   int cutLevel;
   
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogWarning("BaseClass::passedAllOtherSameAndLowerLevelCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning false.";
       return false;
@@ -506,8 +554,8 @@ BaseClass::passedAllOtherSameAndLowerLevelCuts(const string& s)
       cutLevel = cc->second.level_int;
   }
 
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) {
-      cut *c = &(cc->second);
+  for (map<string, cut>::const_iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); ++cc) {
+      const cut *c = &(cc->second);
       if( c->level_int > cutLevel || c->variableName == s ) {
           continue;
       } else {
@@ -612,8 +660,8 @@ BaseClass::writeCutEfficFile()
       nEvtPassed_previousCut = eventCount;
   }
 
-  for (vector<string>::iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); it++) {
-      cut * c = & (cutName_cut_.find(*it)->second);
+  for (vector<string>::const_iterator it = orderedCutNames_.begin(); it != orderedCutNames_.end(); ++it) {
+      cut *c = &(cutName_cut_.find(*it)->second);
       ++bincounter;
       EventCuts_->SetBinContent(bincounter, c->nEvtPassed);
       effRel = c->nEvtPassed / nEvtPassed_previousCut;
@@ -700,12 +748,12 @@ BaseClass::writeCutEfficFile()
 double
 BaseClass::getPreCutValue1(const string& s)
 {
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  map<string, preCut>::const_iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() ) {
       edm::LogError("BaseClass::getPreCutValue1") << "Did not find variableName = "<<s<<" in preCutName_cut_. Returning.";
       exit(1);
   }
-  preCut *c = &(cc->second);
+  const preCut *c = &(cc->second);
   if(c->value1 == -99999999999) {
       edm::LogError("BaseClass::getPreCutValue1") << "value1 of preliminary cut "<<s<<" was not provided.";
       exit(1);
@@ -716,12 +764,12 @@ BaseClass::getPreCutValue1(const string& s)
 double
 BaseClass::getPreCutValue2(const string& s)
 {
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  map<string, preCut>::const_iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() ) {
       edm::LogError("BaseClass::getPreCutValue2") << "Did not find variableName = "<<s<<" in preCutName_cut_. Returning.";
       exit(1);
   }
-  preCut *c = &(cc->second);
+  const preCut *c = &(cc->second);
   if(c->value2 == -99999999999) {
       edm::LogError("BaseClass::getPreCutValue2") << "value2 of preliminary cut "<<s<<" was not provided.";
       exit(1);
@@ -732,12 +780,12 @@ BaseClass::getPreCutValue2(const string& s)
 double
 BaseClass::getPreCutValue3(const string& s)
 {
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  map<string, preCut>::const_iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() ) {
       edm::LogError("BaseClass::getPreCutValue3") << "Did not find variableName = "<<s<<" in preCutName_cut_. Returning.";
       exit(1);
   }
-  preCut *c = &(cc->second);
+  const preCut *c = &(cc->second);
   if(c->value3 == -99999999999) {
       edm::LogError("BaseClass::getPreCutValue3") << "value3 of preliminary cut "<<s<<" was not provided.";
       exit(1);
@@ -748,12 +796,12 @@ BaseClass::getPreCutValue3(const string& s)
 double
 BaseClass::getPreCutValue4(const string& s)
 {
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  map<string, preCut>::const_iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() ) {
       edm::LogError("BaseClass::getPreCutValue4") << "Did not find variableName = "<<s<<" in preCutName_cut_. Returning.";
       exit(1);
   }
-  preCut *c = &(cc->second);
+  const preCut *c = &(cc->second);
   if(c->value4 == -99999999999) {
       edm::LogError("BaseClass::getPreCutValue4") << "value4 of preliminary cut "<<s<<" was not provided.";
       exit(1);
@@ -764,55 +812,55 @@ BaseClass::getPreCutValue4(const string& s)
 double
 BaseClass::getCutMinValue1(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getCutMinValue1") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
   }
-  cut *c = &(cc->second);
+  const cut *c = &(cc->second);
   return (c->minValue1);
 }
 
 double
 BaseClass::getCutMaxValue1(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getCutMaxValue1") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
   }
-  cut *c = &(cc->second);
+  const cut *c = &(cc->second);
   return (c->maxValue1);
 }
 
 double
 BaseClass::getCutMinValue2(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getCutMinValue2") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
   }
-  cut *c = &(cc->second);
+  const cut *c = &(cc->second);
   return (c->minValue2);
 }
 
 double
 BaseClass::getCutMaxValue2(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getCutMaxValue2") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
   }
-  cut *c = &(cc->second);
+  const cut *c = &(cc->second);
   return (c->maxValue2);
 }
 
 const TH1D&
 BaseClass::getHisto_skim_or_noCuts(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHisto_skim_or_noCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
@@ -824,7 +872,7 @@ BaseClass::getHisto_skim_or_noCuts(const string& s)
 const TH1D&
 BaseClass::getHisto_allPreviousCuts(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHisto_allPreviousCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
@@ -836,7 +884,7 @@ BaseClass::getHisto_allPreviousCuts(const string& s)
 const TH1D&
 BaseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHisto_allOthrSmAndLwrLvlCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
@@ -848,7 +896,7 @@ BaseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
 const TH1D&
 BaseClass::getHisto_allOtherCuts(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHisto_allOtherCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
@@ -860,7 +908,7 @@ BaseClass::getHisto_allOtherCuts(const string& s)
 const TH1D&
 BaseClass::getHisto_allCuts(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHisto_allCuts") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
@@ -872,7 +920,7 @@ BaseClass::getHisto_allCuts(const string& s)
 int
 BaseClass::getHistoNBins(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHistoNBins") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
@@ -884,7 +932,7 @@ BaseClass::getHistoNBins(const string& s)
 double
 BaseClass::getHistoMin(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHistoMin") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
@@ -896,7 +944,7 @@ BaseClass::getHistoMin(const string& s)
 double
 BaseClass::getHistoMax(const string& s)
 {
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  map<string, cut>::const_iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() ) {
       edm::LogError("BaseClass::getHistoMax") << "Did not find variableName = "<<s<<" in cutName_cut_. Returning.";
       exit(1);
