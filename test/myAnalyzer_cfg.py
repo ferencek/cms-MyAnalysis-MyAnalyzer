@@ -89,7 +89,8 @@ if not options.produceSkim:
 ## Input files
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/user/ferencek/Jet/Run2011A-05Aug2011-v1_EDMTuple_V00-00-01/6d363a44e73023f68a8f3b11d67becad/EDMTuple_9_1_gAt.root'
+        #'/store/user/ferencek/Jet/Run2011A-05Aug2011-v1_EDMTuple_V00-00-01/6d363a44e73023f68a8f3b11d67becad/EDMTuple_9_1_gAt.root'
+        '/store/user/ferencek/HT/Run2011A-05Aug2011-v1_EDMTuple_V00-00-03/117fa890f807f13ca93974607465b3d6/EDMTuple_9_1_TfJ.root'
     )
 )
 
