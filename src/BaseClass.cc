@@ -957,13 +957,14 @@ void
 BaseClass::CreateAndFillUserTH1D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
 {
   if( skimMode_ ) return;
-  
-  map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+
+  string name = nameAndTitle.substr(0,int(nameAndTitle.find(";")));
+  map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(name);
   if( nh_h == userTH1Ds_.end() ) {
-      TH1D *h = fs->make<TH1D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
+      TH1D *h = fs->make<TH1D>(name.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
       h->Sumw2();
       h->Fill(value, weight);
-      userTH1Ds_[nameAndTitle] = h;
+      userTH1Ds_[name] = h;
   } else {
       nh_h->second->Fill(value, weight);
   }
@@ -973,14 +974,15 @@ void
 BaseClass::CreateUserTH1D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
 {
   if( skimMode_ ) return;
- 
-  map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+
+  string name = nameAndTitle.substr(0,int(nameAndTitle.find(";")));
+  map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(name);
   if( nh_h == userTH1Ds_.end() ) {
-      TH1D *h = fs->make<TH1D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
+      TH1D *h = fs->make<TH1D>(name.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
       h->Sumw2();
-      userTH1Ds_[nameAndTitle] = h;
+      userTH1Ds_[name] = h;
   } else {
-      edm::LogError("BaseClass::CreateUserTH1D") << "Trying to define already existing histogram "<<nameAndTitle;
+      edm::LogError("BaseClass::CreateUserTH1D") << "Trying to define already existing histogram "<<name;
       exit(1);
   }
 }
@@ -988,9 +990,10 @@ BaseClass::CreateUserTH1D(const string& nameAndTitle, Int_t nbinsx, Double_t xlo
 void
 BaseClass::FillUserTH1D(const string& nameAndTitle, Double_t value, Double_t weight)
 {
-  map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+  string name = nameAndTitle.substr(0,int(nameAndTitle.find(";")));
+  map<string, TH1D*>::iterator nh_h = userTH1Ds_.find(name);
   if( nh_h == userTH1Ds_.end() ) {
-      edm::LogError("BaseClass::FillUserTH1D") << "Trying to fill histogram "<<nameAndTitle<<" that was not defined.";
+      edm::LogError("BaseClass::FillUserTH1D") << "Trying to fill histogram "<<name<<" that was not defined.";
       exit(1);
   } else {
       nh_h->second->Fill(value, weight);
@@ -1001,13 +1004,14 @@ void
 BaseClass::CreateAndFillUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
 {
   if( skimMode_ ) return;
- 
-  map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+
+  string name = nameAndTitle.substr(0,int(nameAndTitle.find(";")));
+  map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(name);
   if( nh_h == userTH2Ds_.end() ) {
-      TH2D *h = fs->make<TH2D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
+      TH2D *h = fs->make<TH2D>(name.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
       h->Sumw2();
       h->Fill(value_x, value_y, weight);
-      userTH2Ds_[nameAndTitle] = h;
+      userTH2Ds_[name] = h;
   } else {
       nh_h->second->Fill(value_x, value_y, weight);
   }
@@ -1017,14 +1021,15 @@ void
 BaseClass::CreateUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
 {
   if( skimMode_ ) return;
- 
-  map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+
+  string name = nameAndTitle.substr(0,int(nameAndTitle.find(";")));
+  map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(name);
   if( nh_h == userTH2Ds_.end() ) {
-      TH2D *h = fs->make<TH2D>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
+      TH2D *h = fs->make<TH2D>(name.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
       h->Sumw2();
-      userTH2Ds_[nameAndTitle] = h;
+      userTH2Ds_[name] = h;
   } else {
-      edm::LogError("BaseClass::CreateUserTH2D") << "Trying to define already existing histogram "<<nameAndTitle;
+      edm::LogError("BaseClass::CreateUserTH2D") << "Trying to define already existing histogram "<<name;
       exit(1);
   }
 }
@@ -1033,10 +1038,11 @@ void
 BaseClass::FillUserTH2D(const string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
   if( skimMode_ ) return;
- 
-  map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+
+  string name = nameAndTitle.substr(0,int(nameAndTitle.find(";")));
+  map<string, TH2D*>::iterator nh_h = userTH2Ds_.find(name);
   if( nh_h == userTH2Ds_.end() ) {
-      edm::LogError("BaseClass::FillUserTH2D") << "Trying to fill histogram "<<nameAndTitle<<" that was not defined.";
+      edm::LogError("BaseClass::FillUserTH2D") << "Trying to fill histogram "<<name<<" that was not defined.";
       exit(1);;
   } else {
       nh_h->second->Fill(value_x, value_y, weight);

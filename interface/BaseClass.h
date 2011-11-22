@@ -16,7 +16,7 @@
 //
 // Original Author:  Dinko Ferencek
 //         Created:  Mon Sep 12 15:06:41 CDT 2011
-// $Id: BaseClass.h,v 1.1 2011/09/16 06:45:00 ferencek Exp $
+// $Id: BaseClass.h,v 1.3 2011/11/15 01:53:19 ferencek Exp $
 //
 //
 
@@ -174,10 +174,10 @@ class BaseClass {
       void CreateAndFillUserTH1D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
       void CreateUserTH1D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
       void FillUserTH1D(const string& nameAndTitle, Double_t value, Double_t weight=1);
-      void CreateAndFillUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
+      void CreateAndFillUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Double_t value_x, Double_t value_y, Double_t weight=1);
       void CreateUserTH2D(const string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
-      void FillUserTH2D(const string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
-
+      void FillUserTH2D(const string& nameAndTitle, Double_t value_x, Double_t value_y, Double_t weight=1);
+      
       bool skimWasMade_;
       edm::InputTag eventCounterInputTag_;
       double NEvtTotBeforeWeight_;
