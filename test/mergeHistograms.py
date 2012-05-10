@@ -162,6 +162,7 @@ def main():
         if(count_datasets==0):
           final_histos[group][histoName] = copy.deepcopy(htemp)
           final_histos[group][histoName].SetName(group + '__' + histoName)
+          final_histos[group][histoName].Scale(weight)
         else:
           final_histos[group][histoName].Add(htemp, weight)
 
