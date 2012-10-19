@@ -32,9 +32,8 @@ Options:
 The -w (--main_workdir) parameter defines the name of the main working directory, the -d (--dataset_list)
 parameter specifies the location of a text file containing a list of datasets to be processed, the -c (--cmssw_cfg)
 parameter specifies the location of a common CMSSW configuration file, the -f (--cut_file) parameter specifies the
-location of a CRAB configuration file template, and the -t (--crab_cfg_template) parameter specifies the location
-of a CRAB configuration file template. With the input parameters provided, the createCrabJobs.py script creates the
-following file and directory structure
+location of a cut file, and the -t (--crab_cfg_template) parameter specifies the location of a CRAB configuration file
+template. With the input parameters provided, the createCrabJobs.py script creates the following file and directory structure
 
 MAIN_WORKDIR/ (Main working directory)
     |
